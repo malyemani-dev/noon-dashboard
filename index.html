@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>لوحة المتابعة اليومية — تدقيق الطلاب</title>
+<style>
+:root { color-scheme: light; }
+* { box-sizing: border-box; }
+body { font-family:-apple-system,"Segoe UI",Tahoma,Arial,sans-serif; background:#f7f7f5; color:#1f2937; margin:0; padding:20px; line-height:1.6; }
+.wrap { max-width:980px; margin:0 auto; }
+.head { display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; margin-bottom:14px; }
+.title { font-size:20px; font-weight:600; margin:0; }
+.sub { font-size:12px; color:#6b7280; margin:2px 0 0; }
+.live { font-size:12px; color:#0f6e56; background:#e1f5ee; padding:4px 12px; border-radius:8px; }
+.tabs { display:flex; gap:6px; margin-bottom:16px; border-bottom:1px solid #e5e3da; }
+.tabs button { padding:9px 18px; border:0; background:none; border-bottom:2px solid transparent; cursor:pointer; font-size:14px; color:#6b7280; font-family:inherit; }
+.tabs button.on { color:#185fa5; border-bottom-color:#185fa5; font-weight:600; }
+.cards { display:grid; grid-template-columns:repeat(auto-fit,minmax(108px,1fr)); gap:10px; margin-bottom:14px; }
+.card { background:#fff; border:1px solid #eae8e2; border-radius:12px; padding:12px 14px; }
+.card .lbl { font-size:12px; color:#6b7280; margin:0 0 4px; }
+.card .val { font-size:22px; font-weight:600; margin:0; }
+.r{color:#a32d2d;} .a{color:#185fa5;} .g{color:#0f6e56;} .w{color:#854f0b;}
+.prog { height:8px; background:#eee; border-radius:4px; overflow:hidden; margin:0 0 4px; }
+.prog > div { height:100%; background:#1d9e75; }
+.filters { display:flex; gap:8px; flex-wrap:wrap; margin:14px 0; }
+.filters button { padding:7px 14px; border:1px solid #d1d5db; background:#fff; border-radius:20px; cursor:pointer; font-size:13px; color:#374151; }
+.filters button.on { background:#185fa5; color:#fff; border-color:#185fa5; }
+.row { background:#fff; border:1px solid #eae8e2; border-radius:12px; padding:12px 16px; margin-bottom:10px; }
+.row.high{border-right:4px solid #a32d2d;} .row.medium{border-right:4px solid #ba7517;} .row.low{border-right:4px solid #888780;} .row.clean{border-right:4px solid #1d9e75;}
+.row-top { display:flex; align-items:center; justify-content:space-between; gap:8px; flex-wrap:wrap; margin-bottom:8px; }
+.name { font-size:15px; font-weight:600; }
+.meta { font-size:12px; color:#6b7280; }
+.hslink { font-size:12px; color:#185fa5; text-decoration:none; background:#e6f1fb; padding:2px 8px; border-radius:6px; white-space:nowrap; }
+.disc { font-size:12px; background:#eee6fb; color:#3c3489; padding:2px 8px; border-radius:6px; }
+.alerts { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:8px; }
+.alert { font-size:12px; padding:3px 9px; border-radius:6px; background:#fdf5f5; color:#a32d2d; border:1px solid #f0d5d5; }
+.alert.medium { background:#fdf8ef; color:#854f0b; border-color:#eaddc2; }
+.alert.low { background:#f5f5f2; color:#5f5e5a; border-color:#e5e3da; }
+.pri { font-size:11px; padding:2px 9px; border-radius:8px; }
+.pri.high{background:#fcebeb;color:#a32d2d;} .pri.medium{background:#faeeda;color:#854f0b;} .pri.low{background:#f1efe8;color:#5f5e5a;} .pri.clean{background:#e1f5ee;color:#0f6e56;}
+.chk { display:flex; flex-wrap:wrap; gap:5px; margin:8px 0; }
+.chk span { font-size:11px; padding:2px 8px; border-radius:6px; }
+.chk .ok { background:#e1f5ee; color:#0f6e56; }
+.chk .no { background:#fcebeb; color:#a32d2d; }
+.foot { display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; margin-top:8px; border-top:1px dashed #ece9e0; padding-top:8px; }
+.wf { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+.steps { display:flex; }
+.step { font-size:11px; padding:4px 11px; border:1px solid #d1d5db; cursor:pointer; background:#fff; color:#6b7280; }
+.step:first-child{border-radius:0 8px 8px 0;} .step:last-child{border-radius:8px 0 0 8px;}
+.step.on0{background:#888780;color:#fff;border-color:#888780;}
+.step.on1{background:#ba7517;color:#fff;border-color:#ba7517;}
+.step.on2{background:#0f6e56;color:#fff;border-color:#0f6e56;}
+.edited { font-size:11px; color:#0f6e56; background:#e1f5ee; padding:2px 8px; border-radius:6px; }
+select,input { padding:6px 9px; border:1px solid #d1d5db; border-radius:8px; font-size:13px; font-family:inherit; background:#fff; }
+button.act { padding:7px 13px; border:1px solid #185fa5; background:#185fa5; color:#fff; border-radius:8px; cursor:pointer; font-size:13px; }
+.sec { font-size:15px; font-weight:600; margin:22px 0 10px; }
+.note { font-size:12px; color:#6b7280; background:#fff; border:1px dashed #d5d3ca; border-radius:10px; padding:10px 14px; margin-top:14px; }
+.loading { text-align:center; color:#6b7280; padding:40px; }
+.err { background:#fcebeb; color:#a32d2d; padding:12px 16px; border-radius:10px; }
+.tk-t2{font-size:12px;color:#6b7280;margin-bottom:8px;}
+/* ===== DARK THEME OVERRIDE ===== */
+:root{ color-scheme:dark; }
+body{ background:#1b1b19 !important; color:#ececea !important; }
+.title,.name,.sec,.card .val{ color:#fff !important; }
+.sub,.meta,.tk-t2,.loading,.card .lbl,.note{ color:#9a9a93 !important; }
+.live{ color:#7fd8b5 !important; background:#17402f !important; }
+.tabs{ border-bottom-color:#3a3a37 !important; }
+.tabs button{ color:#9a9a93 !important; }
+.tabs button.on{ color:#6aa9e0 !important; border-bottom-color:#6aa9e0 !important; }
+.card,.row{ background:#262624 !important; border-color:#34342f !important; }
+.r{color:#e5706f !important;} .a{color:#6aa9e0 !important;} .g{color:#4bbf97 !important;} .w{color:#e0a850 !important;}
+.prog{ background:#333330 !important; }
+.filters button{ background:#262624 !important; border-color:#45453f !important; color:#cfcfc9 !important; }
+.filters button.on{ background:#1c3a5c !important; color:#fff !important; border-color:#2f6bb0 !important; }
+.hslink{ color:#8fc0f0 !important; background:#1c3a5c !important; }
+.disc{ background:#2e2a52 !important; color:#b6aef0 !important; }
+.alert{ background:#3a1a1a !important; color:#f0a0a0 !important; border-color:#542828 !important; }
+.alert.medium{ background:#3a2e12 !important; color:#e6c06a !important; border-color:#544515 !important; }
+.alert.low{ background:#2e2e2b !important; color:#b0afa9 !important; border-color:#43433e !important; }
+.pri.high{background:#4a1d1d !important;color:#f0a0a0 !important;} .pri.medium{background:#46370f !important;color:#e6c06a !important;} .pri.low{background:#33322f !important;color:#b0afa9 !important;} .pri.clean{background:#17402f !important;color:#7fd8b5 !important;}
+.chk .ok{ background:#17402f !important; color:#7fd8b5 !important; }
+.chk .no{ background:#3a1a1a !important; color:#f0a0a0 !important; }
+.foot{ border-top-color:#3a3a35 !important; }
+.step{ background:#2a2a28 !important; border-color:#45453f !important; color:#9a9a93 !important; }
+.step.on0{background:#6a6a64 !important;color:#fff !important;} .step.on1{background:#ba7517 !important;color:#fff !important;} .step.on2{background:#0f6e56 !important;color:#fff !important;}
+.edited{ color:#7fd8b5 !important; background:#17402f !important; }
+.note{ background:#232321 !important; border-color:#45453f !important; }
+.err{ background:#3a1a1a !important; color:#f0a0a0 !important; }
+select,input{ background:#2a2a28 !important; color:#ececea !important; border:1px solid #45453f !important; }
+input::placeholder{ color:#77776f; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="head">
+    <div>
+      <p class="title">المتابعة اليومية — تدقيق الطلاب</p>
+      <p class="sub">Enrollment Pipeline · مقبول + مسجّل فقط · تسجيلات ٢٦/٢٧ · مباشر من HubSpot</p>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;">
+      <span class="live">● مباشر</span>
+      <label style="font-size:12px;color:#6b7280;">المستخدم:
+        <select id="auditor" onchange="renderMain()"><option>مها اليمني</option><option>عبدالعزيز النصار</option></select>
+      </label>
+    </div>
+  </div>
+  <div class="tabs">
+    <button data-v="overview" class="on" onclick="setView('overview')">نظرة عامة</button>
+    <button data-v="main" onclick="setView('main')">التدقيق والمتابعة</button>
+    <button data-v="appt" onclick="setView('appt')">المواعيد</button>
+    <button data-v="disc" onclick="setView('disc')">الخصومات</button>
+  </div>
+  <div id="content"><div class="loading">جارٍ سحب البيانات من HubSpot…</div></div>
+</div>
+
+<script>
+function showLogin(){
+  if(document.getElementById("loginOv"))return;
+  const o=document.createElement("div"); o.id="loginOv";
+  o.style.cssText="position:fixed;inset:0;background:#141412;display:flex;align-items:center;justify-content:center;z-index:9999";
+  o.innerHTML='<div style="background:#262624;border:1px solid #34342f;padding:26px;border-radius:14px;max-width:340px;width:90%;text-align:center"><div style="font-size:19px;font-weight:600;color:#fff;margin-bottom:4px">لوحة متابعة نون</div><div style="font-size:13px;color:#9a9a93;margin-bottom:14px">تسجيل دخول الفريق</div><input id="pw" type="password" placeholder="كلمة المرور" style="width:100%;padding:10px;border-radius:8px;border:1px solid #45453f;background:#2a2a28;color:#fff;margin-bottom:10px" onkeydown="if(event.key===\'Enter\')doLogin()"/><button onclick="doLogin()" style="width:100%;padding:10px;border:0;border-radius:8px;background:#1c3a5c;color:#fff;cursor:pointer;font-size:14px">دخول</button><p id="lerr" style="color:#e5706f;font-size:12px;margin:8px 0 0"></p></div>';
+  document.body.appendChild(o);
+}
+async function doLogin(){
+  const pw=document.getElementById("pw").value;
+  const r=await fetch("/api/login",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({password:pw})});
+  if(r.ok){ document.getElementById("loginOv").remove(); location.reload(); }
+  else document.getElementById("lerr").textContent="كلمة المرور غير صحيحة";
+}
+window.cowork={ callMcpTool: async(tool,args)=>{
+  const r=await fetch("/api/hubspot",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({tool,args})});
+  if(r.status===401){ showLogin(); throw new Error("unauthorized"); }
+  return r.json();
+}};
+const TOOL="mcp__38f967d9-1c24-4ec1-9f8e-1c97e68140ad__search_crm_objects";
+const PORTAL="144766390";
+const recUrl=id=>`https://app.hubspot.com/contacts/${PORTAL}/record/0-3/${id}`;
+const PIPELINE="3389246713", ACC="4640337123", ENR="4640337124";
+const TODAY=new Date().toISOString().slice(0,10);
+const PROPS=["dealname","dealstage","track","student_s_selected_school","school_status","semester_status","st_national_id","amount","payment_status","payment_paid","paid_amount","aljahzyt_alakadymyt","aldafyt_waltmwh","alslwk_walanzbat","alqym","altfal_observation","mlamt_almsar","phonef","hatf_alam","mother_s_mobile_number","attachment","visit_completed","interview_pass","discount","discount_enrollment","appointment_datetime","datetimevisit","hs_lastmodifieddate","createdate"];
+const STAGES={"4640337121":"استفسار","4640265450":"مؤهل","4640337122":"موعد محجوز","5647678702":"زيارة الحرم","4640337123":"مقبول","4640337124":"مسجّل","4640337125":"مرفوض","4640337126":"ملغى"};
+const HOUR=3600000;
+const CRIT=[["aljahzyt_alakadymyt","الجاهزية الأكاديمية"],["aldafyt_waltmwh","الدافعية والطموح"],["alslwk_walanzbat","التواصل والتعبير"],["alqym","الالتزام والشغف"],["altfal_observation","التعلم التعاوني"],["mlamt_almsar","جاهزية ولي الأمر"]];
+const FEES={
+"مدارس ابن خلدون - حي عرقة":[14000,28000],"مدارس ابن خلدون - حي النفل":[13000,26000],
+"مدارس ابن خلدون - حي الياسمين":[14000,28000],"مدارس دار البراح":[13500,27000],
+"مدارس رحاب المعرفة – حي اليرموك | Rehab Al-Ma'rifa Schools":[11000,22000],
+"مدارس رائدة السلام الأهلية – حي السلام | Pioneer Al Salam Private Schools":[10000,20000],
+"مدارس دار القلم":[10000,20000],"مدارس أطياب الأهلية – حي الربوة | Atyab Private Schools":[12000,24000],
+"مدارس العليا الأهلية – حي المرسلات | Al-Ulya Private Schools":[12000,24000],
+"مدارس أسراري - الياسمين":[14000,28000],"مدارس ابن خلدون - حي المنار":[11500,23000]};
+const TBD="سيتم التحديد لاحقاً";
+const INTERNAL_SET=new Set([...Object.keys(FEES),"مدارس المدينة الأكاديمية - غرناطة","مدارس أضواء النهضة - حي النهضة"]);
+const validId=s=>/^\d{10}$/.test(String(s||"").replace(/[\s-]/g,""));
+const DEF_IMP={name:"medium",track:"high",school:"medium",status:"medium",semester:"medium",id:"high",fees:"medium",crit:"high",father:"high",mother:"high",attach:"low",visit:"medium",interview:"medium",pay:"high",disc:"high"};
+const CHECK_LABELS={name:"الاسم",track:"المسار",school:"المدرسة",status:"حالة المدرسة",semester:"الفصل الدراسي",id:"الهوية",fees:"الرسوم",crit:"معايير المقابلة",father:"هاتف الأب",mother:"هاتف الأم",attach:"المرفق",visit:"الحضور",interview:"المقابلة",pay:"الدفع",disc:"الخصم"};
+const impCfg=()=>JSON.parse(localStorage.getItem("impConfig")||"{}");
+const impOf=k=>impCfg()[k]||DEF_IMP[k]||"medium";
+const getCustom=()=>JSON.parse(localStorage.getItem("customChecks")||"[]");
+const empty=v=>v===undefined||v===null||String(v).trim()==="";
+const num=v=>{let n=parseFloat(v);return isNaN(n)?null:n;};
+const validPhone=s=>/^\+9665\d{8}$/.test(String(s||"").replace(/[\s-]/g,""));
+const hasArDigits=s=>/[٠-٩۰-۹]/.test(String(s||""));
+const shortSchool=s=>empty(s)?"—":s.split("|")[0].replace("مدارس ","").replace("دار البراح","دار البراءة").trim();
+const fmtDate=s=>{ if(!s)return"—"; return new Date(s).toLocaleString("ar-SA",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"}); };
+const pc=x=>{ if(empty(x))return null; x=String(x).trim(); if(x.endsWith("%"))return parseFloat(x)/100; let n=parseFloat(x); return isNaN(n)?null:(n>1?n/100:n);};
+function discPct(p){ const v=pc(p.discount_enrollment)??pc(p.discount); return (v&&v>0)?Math.round(v*1000)/10:0; }
+let VIEW="main", FILTER="all", MISS="", UPD="", ALL=[], PROP_LIST=[];
+function setUpd(v){ UPD=v; renderRows(); }
+const allCheckLabels=()=>[...Object.values(CHECK_LABELS),...getCustom().map(c=>c.label)];
+function setMiss(v){ MISS=v; renderRows(); }
+async function ensureProps(){
+  if(PROP_LIST.length)return;
+  try{
+    const r=await window.cowork.callMcpTool("mcp__38f967d9-1c24-4ec1-9f8e-1c97e68140ad__search_properties",{objectType:"deals",keywords:[]});
+    const d=r.structuredContent??JSON.parse(r.content[0].text);
+    const seen={}; PROP_LIST=(d.results||[]).filter(p=>p.name&&!seen[p.name]&&(seen[p.name]=1)).sort((a,b)=>(a.label||a.name).localeCompare(b.label||b.name,"ar"));
+    if(document.getElementById("settings")&&document.getElementById("settings").style.display!=="none") renderSettings();
+  }catch(e){ const el=document.getElementById("propcount"); if(el) el.textContent="تعذّر تحميل قائمة الحقول: "+e.message; }
+}
+function onPick(){ const v=document.getElementById("cf-pick").value; const i=v.lastIndexOf(" — "); if(i>0){ document.getElementById("cf-label").value=v.slice(0,i); document.getElementById("cf-prop").value=v.slice(i+3); } }
+function toggleSettings(){ const el=document.getElementById("settings"); if(el.style.display==="none"){ renderSettings(); el.style.display="block"; ensureProps(); } else el.style.display="none"; }
+function renderSettings(){
+  const cfg=impCfg(), cust=getCustom();
+  document.getElementById("settings").innerHTML=`
+    <div class="row" style="border-right:4px solid #6aa9e0">
+      <div class="sec" style="margin:0 0 8px">أهمية كل تدقيق</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:8px">
+        ${Object.entries(CHECK_LABELS).map(([k,l])=>`<label class="meta">${l}
+          <select onchange="setImp('${k}',this.value)">
+            <option value="high" ${impOf(k)==="high"?"selected":""}>مهمة</option>
+            <option value="medium" ${impOf(k)==="medium"?"selected":""}>متوسطة</option>
+            <option value="low" ${impOf(k)==="low"?"selected":""}>ضعيفة</option>
+          </select></label>`).join("")}
+      </div>
+      <div class="sec" style="margin:16px 0 8px">حقول مخصّصة من HubSpot</div>
+      ${cust.length?cust.map(c=>`<div class="wf" style="margin-bottom:6px"><span class="meta">${c.label} <code style="color:#8fc0f0">${c.prop}</code> · ${c.imp==="high"?"مهمة":c.imp==="medium"?"متوسطة":"ضعيفة"}</span><button class="act" style="background:#a32d2d;border-color:#a32d2d" onclick="delCustom('${c.prop}')">حذف</button></div>`).join(""):'<div class="meta">لا حقول مخصّصة بعد.</div>'}
+      <div class="wf" style="margin-top:8px">
+        <input id="cf-pick" list="allprops" placeholder="ابحثي واختاري حقل من هب سبوت…" style="flex:1;min-width:220px" oninput="onPick()" />
+        <datalist id="allprops">${PROP_LIST.map(pr=>`<option value="${pr.label||pr.name} — ${pr.name}"></option>`).join("")}</datalist>
+        <input id="cf-prop" type="hidden" />
+        <input id="cf-label" placeholder="الاسم المعروض" style="flex:1;min-width:150px" />
+        <select id="cf-imp"><option value="high">مهمة</option><option value="medium" selected>متوسطة</option><option value="low">ضعيفة</option></select>
+        <button class="act" onclick="addCustom()">تفعيل الحقل</button>
+      </div>
+      <div class="meta" style="margin-top:6px" id="propcount">${PROP_LIST.length?("كل حقول هب سبوت جاهزة للاختيار ("+PROP_LIST.length+" حقل). الحقل المفعّل يُفحص أنه غير فارغ ويظهر في التحقق والتنبيهات حسب الأهمية."):"جارٍ تحميل قائمة الحقول من هب سبوت…"}</div>
+    </div>`;
+}
+function setImp(k,v){ const c=impCfg(); c[k]=v; localStorage.setItem("impConfig",JSON.stringify(c)); rebuild(); }
+function addCustom(){
+  onPick();
+  let prop=document.getElementById("cf-prop").value.trim();
+  const pick=document.getElementById("cf-pick").value.trim();
+  if(!prop&&pick){ const i=pick.lastIndexOf(" — "); prop=i>0?pick.slice(i+3):pick; }
+  let label=document.getElementById("cf-label").value.trim()||prop;
+  const imp=document.getElementById("cf-imp").value;
+  if(!prop)return;
+  const c=getCustom(); if(c.some(x=>x.prop===prop))return; c.push({prop,label,imp}); localStorage.setItem("customChecks",JSON.stringify(c));
+  load();
+}
+function delCustom(prop){ localStorage.setItem("customChecks",JSON.stringify(getCustom().filter(c=>c.prop!==prop))); load(); }
+function rebuild(){ const names=ALL.map(x=>(x.p.dealname||"").trim()); const dup=new Set(names.filter((n,i)=>names.indexOf(n)!==i&&n)); ALL.forEach(x=>{ x.A=audit(x.p,dup); x.pri=topPri(x.A); x.comp=completeness(x.p); }); renderMain(); }
+
+async function callTool(filters){
+  const r=await window.cowork.callMcpTool(TOOL,{objectType:"deals",filterGroups:[{filters}],properties:PROPS,limit:100});
+  if(r.isError) throw new Error(r.content&&r.content[0]?r.content[0].text:"tool error");
+  const d=r.structuredContent??JSON.parse(r.content[0].text);
+  return d.results||[];
+}
+function audit(p,dup){
+  const A=[], stage=p.dealstage, nm=(p.dealname||"").trim();
+  const words=nm.split(/\s+/).filter(Boolean);
+  if(/[A-Za-z]/.test(nm)) A.push(["الاسم فيه حروف إنجليزية",impOf("name")]);
+  if(words.length<3) A.push(["الاسم أقل من ٣ أسماء",impOf("name")]);
+  if(/[0-9@_/#*]|[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}]/u.test(nm)) A.push(["رموز/أرقام داخل الاسم",impOf("name")]);
+  if(dup.has(nm)) A.push(["اسم مكرر",impOf("name")]);
+  if(!empty(p.track)&&p.track!=="National") A.push(["مسار عالمي",impOf("track")]);
+  const sc=p.student_s_selected_school, amt=num(p.amount);
+  if(empty(sc)) A.push(["المدرسة غير محددة",impOf("school")]);
+  else if(sc===TBD) A.push(["المدرسة لم تُحدد بعد",impOf("school")]);
+  const internal=!empty(sc)&&INTERNAL_SET.has(sc);
+  if(!empty(p.school_status)){
+    if(internal&&p.school_status!=="Internal") A.push(["المدرسة داخلية لكن الحالة "+p.school_status,impOf("status")]);
+    else if(!internal&&!empty(sc)&&sc!==TBD&&p.school_status==="Internal") A.push(["الحالة Internal لكن المدرسة غير داخلية",impOf("status")]);
+  }
+  if(empty(p.semester_status)) A.push(["الفصل الدراسي ناقص",impOf("semester")]);
+  if(empty(p.st_national_id)) A.push(["الهوية ناقصة",impOf("id")]);
+  else if(hasArDigits(p.st_national_id)) A.push(["الهوية بأرقام عربية — لازم إنجليزي",impOf("id")]);
+  else if(!validId(p.st_national_id)) A.push(["الهوية غير صحيحة (١٠ أرقام)",impOf("id")]);
+  if(hasArDigits(p.amount)) A.push(["الرسوم مكتوبة بأرقام عربية — لازم إنجليزي",impOf("fees")]);
+  if(amt===null) A.push(["الرسوم فارغة",impOf("fees")]);
+  else if(!empty(sc)&&FEES[sc]&&!FEES[sc].includes(amt)) A.push(["الرسوم لا تطابق المدرسة (المتوقع "+FEES[sc][0].toLocaleString()+" أو "+FEES[sc][1].toLocaleString()+")",impOf("fees")]);
+  const miss=CRIT.filter(c=>empty(p[c[0]]));
+  if(miss.length) A.push(["معايير مقابلة ناقصة ("+miss.length+"/٦): "+miss.map(m=>m[1]).join("، "),impOf("crit")]);
+  const mother=p.hatf_alam||p.mother_s_mobile_number;
+  if(empty(p.phonef)) A.push(["هاتف الأب ناقص",impOf("father")]);
+  else if(!validPhone(p.phonef)) A.push(["صيغة هاتف الأب غير صحيحة (لازم +966…)",impOf("father")]);
+  if(empty(mother)) A.push(["هاتف الأم ناقص",impOf("mother")]);
+  else if(!validPhone(mother)) A.push(["صيغة هاتف الأم غير صحيحة (لازم +966…)",impOf("mother")]);
+  if(empty(p.attachment)) A.push(["لا يوجد مرفق",impOf("attach")]);
+  if(p.visit_completed!=="Yes") A.push(["الحضور غير مؤكد",impOf("visit")]);
+  if(p.interview_pass!=="Yes") A.push(["المقابلة غير مؤكدة",impOf("interview")]);
+  const hasPay=!empty(p.payment_status)||p.paid_amount==="Yes"||(num(p.payment_paid)||0)>0;
+  if(stage===ACC){ if(hasPay) A.push(["دفع في مرحلة القبول — انقله للدفع","medium"]); }
+  else { if(empty(p.payment_status)) A.push(["حالة الدفع ناقصة",impOf("pay")]); if((num(p.payment_paid)||0)<=0) A.push(["المبلغ المدفوع ناقص",impOf("pay")]); }
+  const v1=pc(p.discount), v2=(p.discount_enrollment===undefined)?null:pc(p.discount_enrollment);
+  if((v1>0&&(v2===null||v2===0))||(v2>0&&(v1===null||v1===0))) A.push(["خصم في خانة واحدة فقط",impOf("disc")]);
+  else if(v1>0&&v2>0&&Math.abs(v1-v2)>0.001) A.push(["تعارض في قيمة الخصم",impOf("disc")]);
+  if(hasArDigits(p.discount)||hasArDigits(p.discount_enrollment)) A.push(["الخصم مكتوب بأرقام عربية — لازم إنجليزي",impOf("disc")]);
+  getCustom().forEach(c=>{ if(empty(p[c.prop])) A.push([c.label+" ناقص",c.imp||"medium"]); });
+  return A;
+}
+function checklist(p){
+  const sc=p.student_s_selected_school, nm=(p.dealname||"").trim();
+  const critOk=CRIT.filter(c=>!empty(p[c[0]])).length, enrolled=p.dealstage===ENR;
+  const payOk=enrolled?(!empty(p.payment_status)&&(num(p.payment_paid)||0)>0):true;
+  return [
+    ["الاسم", nm.split(/\s+/).filter(Boolean).length>=3&&!/[A-Za-z]/.test(nm)],
+    ["المسار", p.track==="National"],
+    ["المدرسة", !empty(sc)&&sc!==TBD],
+    ["حالة المدرسة", !empty(p.school_status)],
+    ["الفصل الدراسي", !empty(p.semester_status)],
+    ["الهوية", validId(p.st_national_id)],
+    ["الرسوم", num(p.amount)!==null],
+    ["معايير المقابلة "+critOk+"/٦", critOk===6],
+    ["هاتف الأب", validPhone(p.phonef)],
+    ["هاتف الأم", validPhone(p.hatf_alam||p.mother_s_mobile_number)],
+    ["المرفق", !empty(p.attachment)],
+    ["الحضور", p.visit_completed==="Yes"],
+    ["المقابلة", p.interview_pass==="Yes"],
+    [enrolled?"الدفع":"الدفع (لا يلزم بالقبول)", payOk],
+    ...getCustom().map(c=>[c.label, !empty(p[c.prop])])
+  ];
+}
+function completeness(p){ const c=checklist(p); return Math.round(c.filter(x=>x[1]).length/c.length*100); }
+const rank={high:0,medium:1,low:2,clean:3};
+const topPri=A=>!A.length?"clean":A.some(a=>a[1]==="high")?"high":A.some(a=>a[1]==="medium")?"medium":"low";
+
+function stateOf(id){ const st=JSON.parse(localStorage.getItem("studentStatus")||"{}"); return st[id]||{}; }
+function setState(id,field,val){
+  const st=JSON.parse(localStorage.getItem("studentStatus")||"{}"); st[id]=st[id]||{}; st[id][field]=val;
+  if(field==="step"&&val===1){ const rec=ALL.find(x=>x.id===id); if(rec) st[id].notifiedMod=rec.p.hs_lastmodifieddate; }
+  localStorage.setItem("studentStatus",JSON.stringify(st)); renderMain();
+}
+
+/* ---------- MAIN (merged audit + follow-up) ---------- */
+function renderMain(){
+  const high=ALL.filter(x=>x.pri==="high").length, med=ALL.filter(x=>x.pri==="medium").length, clean=ALL.filter(x=>x.pri==="clean").length;
+  const editC=ALL.filter(x=>x.p.hs_lastmodifieddate.slice(0,10)===TODAY).length;
+  const act=ALL.filter(x=>x.pri!=="clean");
+  const newN=act.filter(x=>(stateOf(x.id).step||0)===0).length;
+  const notif=act.filter(x=>stateOf(x.id).step===1).length;
+  const doneN=act.filter(x=>stateOf(x.id).step===2).length;
+  const overall=ALL.length?Math.round((clean+doneN)/ALL.length*100):0;
+  const mMaha=ALL.filter(x=>stateOf(x.id).assignee==="مها اليمني").length, mAziz=ALL.filter(x=>stateOf(x.id).assignee==="عبدالعزيز النصار").length;
+  document.getElementById("content").innerHTML=`
+    <div class="cards">
+      <div class="card"><p class="lbl">إجمالي</p><p class="val">${ALL.length}</p></div>
+      <div class="card"><p class="lbl">مهمة</p><p class="val r">${high}</p></div>
+      <div class="card"><p class="lbl">متوسطة</p><p class="val w">${med}</p></div>
+      <div class="card"><p class="lbl">مكتملة</p><p class="val g">${clean}</p></div>
+      <div class="card"><p class="lbl">أُبلغ المسؤول</p><p class="val w">${notif}</p></div>
+      <div class="card"><p class="lbl">تم التعديل</p><p class="val g">${doneN}</p></div>
+      <div class="card"><p class="lbl">عُدّلت اليوم</p><p class="val">${editC}</p></div>
+    </div>
+    <div class="prog"><div style="width:${overall}%"></div></div>
+    <div class="meta" style="margin-bottom:2px">نسبة الإنجاز العامة: ${overall}% · حِمل مها: ${mMaha} · حِمل عبدالعزيز: ${mAziz}</div>
+    <div class="filters">
+      <button data-f="all" onclick="setFilter('all')">الكل (${ALL.length})</button>
+      <button data-f="high" onclick="setFilter('high')">مهمة (${high})</button>
+      <button data-f="medium" onclick="setFilter('medium')">متوسطة (${med})</button>
+      <button data-f="clean" onclick="setFilter('clean')">مكتملة (${clean})</button>
+      <button data-f="new" onclick="setFilter('new')">جديدة (${newN})</button>
+      <button data-f="notif" onclick="setFilter('notif')">أُبلغ (${notif})</button>
+      <button data-f="mine" onclick="setFilter('mine')">مهامي</button>
+      <button data-f="today" onclick="setFilter('today')">عُدّلت اليوم (${editC})</button>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px">
+      <label class="meta">فلتر الحقل الناقص:
+        <select id="missSel" onchange="setMiss(this.value)"><option value="">— الكل —</option>${allCheckLabels().map(l=>`<option ${MISS===l?"selected":""}>${l}</option>`).join("")}</select>
+      </label>
+      <label class="meta">فلتر التحديث:
+        <select id="updSel" onchange="setUpd(this.value)"><option value="">— الكل —</option>${Object.entries(UPD_LBL).map(([k,l])=>`<option value="${k}" ${UPD===k?"selected":""}>${l}</option>`).join("")}</select>
+      </label>
+      <button class="filters" style="padding:6px 12px;border:1px solid #45453f;border-radius:20px;background:#262624;color:#cfcfc9;cursor:pointer" onclick="toggleSettings()">⚙ إعدادات التدقيق</button>
+    </div>
+    <div id="settings" style="display:none"></div>
+    <div id="rows"></div>
+    <div class="note">النطاق: الطلاب في مرحلتَي «مقبول» و«مسجّل» فقط. · التسجيلات التجريبية تحتاج حقلاً مخصّصاً في HubSpot لعدّها منفصلة.</div>`;
+  renderRows();
+}
+function renderRows(){
+  const me=document.getElementById("auditor").value;
+  let shown=ALL.filter(x=>{
+    if(FILTER==="all")return true;
+    if(FILTER==="today")return x.p.hs_lastmodifieddate.slice(0,10)===TODAY;
+    if(FILTER==="new")return x.pri!=="clean"&&(stateOf(x.id).step||0)===0;
+    if(FILTER==="notif")return stateOf(x.id).step===1;
+    if(FILTER==="mine")return stateOf(x.id).assignee===me;
+    if(FILTER!=="all")return x.pri===FILTER;
+    return true;
+  }).filter(x=> !MISS || checklist(x.p).some(c=>!c[1]&&(c[0]===MISS||c[0].startsWith(MISS+" ")||c[0].startsWith(MISS+"("))))
+    .filter(x=> !UPD || (UPD_DEF[UPD]&&UPD_DEF[UPD](x)))
+    .sort((a,b)=>rank[a.pri]-rank[b.pri]);
+  document.getElementById("rows").innerHTML=shown.map(x=>rowHtml(x)).join("")||'<div class="note">لا يوجد ضمن هذا الفلتر.</div>';
+  document.querySelectorAll(".filters button").forEach(b=>b.classList.toggle("on",b.dataset.f===FILTER));
+}
+function rowHtml(x){
+  const p=x.p, st=p.dealstage===ENR?"مسجّل":"مقبول", ed=p.hs_lastmodifieddate.slice(0,10)===TODAY, dp=discPct(p);
+  const s=stateOf(x.id), step=s.step||0, clean=x.pri==="clean";
+  const edited=s.notifiedMod&&p.hs_lastmodifieddate>s.notifiedMod;
+  const steps=clean?'<span class="pri clean">مكتمل — لا يحتاج متابعة</span>':
+    `<div class="steps">${["جديد","أُبلغ المسؤول","تم التعديل"].map((l,i)=>`<div class="step ${step===i?('on'+i):''}" onclick="setState('${x.id}','step',${i})">${l}</div>`).join("")}</div>`;
+  return `<div class="row ${x.pri}">
+    <div class="row-top">
+      <span class="name">${p.dealname||"—"} <span class="meta">· ${st} · ${shortSchool(p.student_s_selected_school)}${ed?' · <b style="color:#0f6e56">عُدّل اليوم</b>':''}</span></span>
+      <span style="display:flex;gap:6px;align-items:center">${dp?`<span class="disc">خصم ${dp}%</span>`:''}<span class="pri ${x.pri}">${x.pri==="high"?"مهمة":x.pri==="medium"?"متوسطة":x.pri==="low"?"ضعيفة":"مكتمل"}</span></span>
+    </div>
+    ${x.A.length?`<div class="alerts">${x.A.map(a=>`<span class="alert ${a[1]}">${a[0]}</span>`).join("")}</div>`:''}
+    <div class="chk">${checklist(p).map(c=>`<span class="${c[1]?'ok':'no'}">${c[1]?'✓':'✗'} ${c[0]}</span>`).join("")}</div>
+    <div class="prog"><div style="width:${x.comp}%"></div></div>
+    <div class="tk-t2">نسبة الاكتمال: ${x.comp}% · آخر تعديل: ${fmtDate(p.hs_lastmodifieddate)}${edited?' · <span class="edited">عُدّل بعد الإبلاغ ✓</span>':''}</div>
+    <div class="foot">
+      <div class="wf">
+        ${steps}
+        ${clean?'':`<select onchange="setState('${x.id}','assignee',this.value)"><option value="">— المسؤول —</option><option ${s.assignee==="مها اليمني"?"selected":""}>مها اليمني</option><option ${s.assignee==="عبدالعزيز النصار"?"selected":""}>عبدالعزيز النصار</option></select>`}
+      </div>
+      <a class="hslink" href="${recUrl(x.id)}" target="_blank">تعديل في HubSpot ↗</a>
+    </div>
+    ${noteHtml(x.id)}
+  </div>`;
+}
+function noteHtml(id){
+  const n=JSON.parse(localStorage.getItem("studentNotes")||"{}")[id];
+  return `<div style="margin-top:8px">
+    ${n?`<div class="tk-t2">📝 ${n.text} — ${n.by} · ${n.at}</div>`:''}
+    <div class="wf"><input id="nt-${id}" placeholder="ملاحظة عن الطالب…" value="${n?n.text.replace(/"/g,'&quot;'):''}" style="flex:1;min-width:160px" /><button class="act" onclick="saveNote('${id}')">حفظ الملاحظة</button></div>
+  </div>`;
+}
+function saveNote(id){
+  const val=document.getElementById("nt-"+id).value.trim(); if(!val)return;
+  const by=document.getElementById("auditor").value, at=new Date().toLocaleString("ar-SA",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"});
+  const n=JSON.parse(localStorage.getItem("studentNotes")||"{}"); n[id]={text:val,by,at}; localStorage.setItem("studentNotes",JSON.stringify(n)); renderRows();
+}
+function setFilter(f){ FILTER=f; renderRows(); }
+
+/* ---------- APPOINTMENTS ---------- */
+function apptDate(p){ const s=p.appointment_datetime||p.datetimevisit; return s?new Date(s):null; }
+async function renderAppts(){
+  document.getElementById("content").innerHTML='<div class="loading">جارٍ سحب المواعيد…</div>';
+  let recs;
+  try{
+    const [a,b]=await Promise.all([
+      callTool([{propertyName:"pipeline",operator:"EQ",value:PIPELINE},{propertyName:"appointment_datetime",operator:"HAS_PROPERTY"}]),
+      callTool([{propertyName:"pipeline",operator:"EQ",value:PIPELINE},{propertyName:"datetimevisit",operator:"HAS_PROPERTY"}])
+    ]);
+    const map={}; [...a,...b].forEach(d=>map[d.id]=d); recs=Object.values(map);
+  }catch(e){ document.getElementById("content").innerHTML='<div class="err">تعذّر سحب المواعيد: '+e.message+'</div>'; return; }
+  const now=new Date();
+  const items=recs.map(d=>{ const dt=apptDate(d.properties); return {id:d.id,p:d.properties,dt}; }).filter(o=>o.dt&&!isNaN(o.dt));
+  items.forEach(o=>{
+    const mod=new Date(o.p.hs_lastmodifieddate);
+    o.today=o.dt.toISOString().slice(0,10)===TODAY;
+    o.upcoming=o.dt>=now;
+    o.overdue = o.dt < (now-24*HOUR) && mod < o.dt;
+  });
+  items.sort((a,b)=>a.dt-b.dt);
+  window._APPT=items;
+  const todayN=items.filter(o=>o.today).length, upN=items.filter(o=>o.upcoming).length, ovN=items.filter(o=>o.overdue).length;
+  document.getElementById("content").innerHTML=`
+    <div class="cards">
+      <div class="card"><p class="lbl">إجمالي المواعيد</p><p class="val">${items.length}</p></div>
+      <div class="card"><p class="lbl">مواعيد اليوم</p><p class="val a">${todayN}</p></div>
+      <div class="card"><p class="lbl">قادمة</p><p class="val g">${upN}</p></div>
+      <div class="card"><p class="lbl">مضت بلا تحديث</p><p class="val r">${ovN}</p></div>
+    </div>
+    <div class="filters">
+      <button data-af="today" class="on" onclick="setAf('today')">اليوم (${todayN})</button>
+      <button data-af="up" onclick="setAf('up')">قادمة (${upN})</button>
+      <button data-af="over" onclick="setAf('over')">مضت بلا تحديث (${ovN})</button>
+      <button data-af="all" onclick="setAf('all')">الكل (${items.length})</button>
+    </div>
+    <div id="alist"></div>
+    <div class="note">التذكير اليومي: المواعيد المجدولة اليوم تظهر أعلاه. التنبيه الأحمر «مضت بلا تحديث» يظهر إذا مضى على الموعد أكثر من ٢٤ ساعة ولم يُعدّل سجل الطالب في HubSpot بعده.</div>`;
+  setAf("today");
+}
+let AF="today";
+function setAf(f){
+  AF=f; document.querySelectorAll("[data-af]").forEach(b=>b.classList.toggle("on",b.dataset.af===f));
+  const items=window._APPT||[];
+  let list = f==="all"?items : f==="today"?items.filter(o=>o.today) : f==="up"?items.filter(o=>o.upcoming) : items.filter(o=>o.overdue);
+  document.getElementById("alist").innerHTML=list.map(o=>{
+    const p=o.p, cls=o.overdue?"high":o.today?"medium":"clean";
+    const when=o.dt.toLocaleString("ar-SA",{weekday:"short",day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"});
+    return `<div class="row ${cls}">
+      <div class="row-top">
+        <span class="name">${p.dealname||"—"} <span class="meta">· ${STAGES[p.dealstage]||"—"} · ${shortSchool(p.student_s_selected_school)}</span></span>
+        <span style="display:flex;gap:6px;align-items:center">${o.overdue?'<span class="pri high">مضى بلا تحديث</span>':o.today?'<span class="pri medium">اليوم</span>':'<span class="pri clean">قادم</span>'}</span>
+      </div>
+      <div class="tk-t2">🗓️ الموعد: ${when} · آخر تعديل: ${fmtDate(p.hs_lastmodifieddate)}${o.overdue?' · <b style="color:#a32d2d">لم تتغيّر الحالة بعد الموعد</b>':''}</div>
+      <div class="foot"><span class="meta">المقابلة: ${p.interview_pass==="Yes"?"✓ تجاوز":p.interview_pass||"غير محدد"} · الحضور: ${p.visit_completed==="Yes"?"✓ حضر":"لم يُؤكد"}</span>
+      <a class="hslink" href="${recUrl(o.id)}" target="_blank">فتح في HubSpot ↗</a></div>
+    </div>`;
+  }).join("")||'<div class="note">لا مواعيد ضمن هذا الفلتر.</div>';
+}
+
+/* ---------- DISCOUNTS ---------- */
+function renderDisc(){
+  const withD=ALL.map(x=>({x,dp:discPct(x.p)})).filter(o=>o.dp>0).sort((a,b)=>b.dp-a.dp);
+  const bySchool={}; withD.forEach(o=>{ const s=shortSchool(o.x.p.student_s_selected_school); bySchool[s]=(bySchool[s]||0)+1; });
+  const schools=Object.entries(bySchool).sort((a,b)=>b[1]-a[1]);
+  const st=JSON.parse(localStorage.getItem("discNotes")||"{}");
+  document.getElementById("content").innerHTML=`
+    <div class="cards">
+      <div class="card"><p class="lbl">عليهم خصم</p><p class="val">${withD.length}</p></div>
+      <div class="card"><p class="lbl">أعلى نسبة</p><p class="val">${withD.length?withD[0].dp:0}%</p></div>
+      <div class="card"><p class="lbl">أكثر مدرسة</p><p class="val" style="font-size:15px">${schools.length?schools[0][0]+" ("+schools[0][1]+")":"—"}</p></div>
+    </div>
+    <div class="sec">الطلاب أصحاب الخصم</div>
+    <div style="margin-bottom:10px"><label style="font-size:12px;color:#6b7280">الترم: <select id="term"><option>الترم الأول</option><option>الترم الثاني</option></select></label></div>
+    <div id="dlist"></div>`;
+  document.getElementById("dlist").innerHTML=withD.map(o=>{
+    const p=o.x.p, id=o.x.id, s=st[id], amt=num(p.amount);
+    const v1=pc(p.discount), v2=(p.discount_enrollment===undefined)?null:pc(p.discount_enrollment);
+    const has1=v1>0, has2=v2>0;
+    let ok=true, statusTxt="متطابق";
+    if(has1&&has2){ if(Math.abs(v1-v2)>0.001){ok=false;statusTxt="تعارض في القيمة — يحتاج مراجعة";} }
+    else if(has1&&!has2){ ok=false; statusTxt="تعارض — Enrollment فارغة"; }
+    else if(!has1&&has2){ ok=false; statusTxt="تعارض — نسبة الخصم فارغة"; }
+    const cell=(lbl,val,miss)=>`<div style="background:#2f2f2c;border-radius:8px;padding:7px 10px;${miss?'outline:1px solid #a34d4d;':''}"><div style="font-size:11px;color:#8a8a83">${lbl}</div><div style="font-size:14px;font-weight:600;color:${miss?'#f0a0a0':'#ececea'}">${val}</div></div>`;
+    return `<div class="row ${ok?'clean':'high'}">
+      <div class="row-top">
+        <span class="name">${p.dealname} <span class="meta">· ${shortSchool(p.student_s_selected_school)} · ${p.dealstage==="4640337124"?"مسجّل":"مقبول"}</span></span>
+        <span class="pri ${ok?'clean':'high'}">${ok?'✓ متطابق':'⚠ '+statusTxt}</span>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:6px 0 8px">
+        ${cell("الرسوم", amt!==null?amt.toLocaleString()+" ر.س":"—", false)}
+        ${cell("Enrollment %", empty(p.discount_enrollment)?"— فارغة":p.discount_enrollment, !has2&&has1)}
+        ${cell("نسبة الخصم", empty(p.discount)?"— فارغة":p.discount, !has1&&has2)}
+      </div>
+      ${s?`<div class="tk-t2">📝 ${s.text} — ${s.by} · ${s.term} · ${s.at}</div>`:''}
+      <div class="wf"><input id="dn-${id}" placeholder="سبب التعديل / ملاحظة التدقيق…" value="${s?s.text.replace(/"/g,'&quot;'):''}" style="flex:1;min-width:160px" /><button class="act" onclick="saveDisc('${id}')">💾 حفظ</button><a class="hslink" href="${recUrl(id)}" target="_blank">فتح في HubSpot ↗</a></div>
+    </div>`;
+  }).join("")||'<div class="note">لا خصومات.</div>';
+}
+function saveDisc(id){
+  const val=document.getElementById("dn-"+id).value.trim(); if(!val)return;
+  const by=document.getElementById("auditor").value, term=document.getElementById("term").value;
+  const at=new Date().toLocaleString("ar-SA",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit"});
+  const st=JSON.parse(localStorage.getItem("discNotes")||"{}"); st[id]={text:val,by,term,at}; localStorage.setItem("discNotes",JSON.stringify(st)); renderDisc();
+}
+
+/* ---------- SHELL ---------- */
+const UPD_DEF={
+  new:x=>x.p.createdate.slice(0,10)===TODAY,
+  appt:x=>!empty(x.p.appointment_datetime)||!empty(x.p.datetimevisit),
+  edited:x=>x.p.hs_lastmodifieddate.slice(0,10)===TODAY,
+  deficiency:x=>x.pri!=="clean",
+  activity:x=>new Date(x.p.hs_lastmodifieddate)>=new Date(Date.now()-3*86400000)
+};
+const UPD_LBL={new:"الطلبات الجديدة",appt:"حجز موعد",edited:"تعديل بيانات",deficiency:"فيها نقص",activity:"حركة في هب سبوت"};
+function jumpTo(kind,val){ setView("main"); if(kind==="upd"){UPD=val;FILTER="all";} else if(kind==="pri"){FILTER=val;UPD="";} else if(kind==="miss"){MISS=val;FILTER="all";UPD="";} renderMain(); }
+async function fetchPipe(){
+  if(window._PIPE) return window._PIPE;
+  let all=[], off=0;
+  for(let i=0;i<6;i++){
+    const r=await window.cowork.callMcpTool(TOOL,{objectType:"deals",filterGroups:[{filters:[{propertyName:"pipeline",operator:"EQ",value:PIPELINE}]}],properties:["dealname","createdate","dealstage","student_s_selected_school"],limit:200,offset:off});
+    const d=r.structuredContent??JSON.parse(r.content[0].text); const res=d.results||[];
+    all=all.concat(res); if(res.length<200) break; off+=200;
+  }
+  window._PIPE=all; return all;
+}
+function regStats(pipe){
+  const byDay={}, bySchool={}, byComplete={};
+  pipe.forEach(d=>{ const p=d.properties; const day=(p.createdate||"").slice(0,10); if(day)byDay[day]=(byDay[day]||0)+1;
+    const s=shortSchool(p.student_s_selected_school); bySchool[s]=(bySchool[s]||0)+1;
+    if(p.dealstage===ENR) byComplete[s]=(byComplete[s]||0)+1; });
+  return {byDay,bySchool,byComplete};
+}
+function showNewToday(){
+  const pipe=window._PIPE||[];
+  const list=pipe.filter(d=>(d.properties.createdate||"").slice(0,10)===TODAY);
+  const el=document.getElementById("newlist");
+  if(el.innerHTML){ el.innerHTML=""; return; }
+  el.innerHTML=`<div class="row clean"><div class="sec" style="margin:0 0 8px">تسجيلات اليوم (${list.length})</div>${list.map(d=>`<div class="wf" style="justify-content:space-between;padding:5px 4px;border-bottom:1px solid #34342f"><span class="meta">${d.properties.dealname||"—"} · ${shortSchool(d.properties.student_s_selected_school)}</span><a class="hslink" href="${recUrl(d.id)}" target="_blank">HubSpot ↗</a></div>`).join("")||'<div class="meta">لا تسجيلات اليوم.</div>'}</div>`;
+}
+async function renderOverview(){
+  document.getElementById("content").innerHTML='<div class="loading">جارٍ حساب المتابعة العامة…</div>';
+  let pipe=[]; try{ pipe=await fetchPipe(); }catch(e){}
+  const rs=regStats(pipe);
+  const newToday=(rs.byDay[TODAY]||0);
+  const topDay=Object.entries(rs.byDay).sort((a,b)=>b[1]-a[1])[0];
+  const topSchools=Object.entries(rs.bySchool).sort((a,b)=>b[1]-a[1]).slice(0,8);
+  const topComplete=Object.entries(rs.byComplete).sort((a,b)=>b[1]-a[1]).slice(0,8);
+  renderOverviewBody(pipe.length,newToday,topDay,topSchools,topComplete);
+}
+function renderOverviewBody(pipeTotal,newToday,topDay,topSchools,topComplete){
+  const total=ALL.length;
+  const high=ALL.filter(x=>x.pri==="high").length, med=ALL.filter(x=>x.pri==="medium").length, clean=ALL.filter(x=>x.pri==="clean").length;
+  const avgComp=Math.round(ALL.reduce((s,x)=>s+x.comp,0)/(total||1));
+  const uc=Object.keys(UPD_DEF).reduce((o,k)=>(o[k]=ALL.filter(UPD_DEF[k]).length,o),{});
+  const labels=allCheckLabels();
+  const missCounts=labels.map(l=>[l, ALL.filter(x=>checklist(x.p).some(c=>!c[1]&&(c[0]===l||c[0].startsWith(l+" ")||c[0].startsWith(l+"(")))).length]).filter(o=>o[1]>0).sort((a,b)=>b[1]-a[1]);
+  const schools={}; ALL.forEach(x=>{ const s=shortSchool(x.p.student_s_selected_school); schools[s]=(schools[s]||0)+1; });
+  const cc=(lbl,valu,cls,onclick)=>`<div class="card" style="cursor:pointer" onclick="${onclick}"><p class="lbl">${lbl}</p><p class="val ${cls||''}">${valu}</p></div>`;
+  document.getElementById("content").innerHTML=`
+    <div class="sec" style="margin-top:0">المتابعة العامة — اضغطي أي رقم لعرض القائمة كاملة</div>
+    <div class="cards">
+      ${cc("إجمالي الطلبات",total,"",`jumpTo('pri','all')`)}
+      ${cc("مهمة",high,"r",`jumpTo('pri','high')`)}
+      ${cc("متوسطة",med,"w",`jumpTo('pri','medium')`)}
+      ${cc("مكتملة",clean,"g",`jumpTo('pri','clean')`)}
+      ${cc("متوسط الاكتمال",avgComp+"%","g",`jumpTo('pri','all')`)}
+    </div>
+    <div class="sec">حركة العمل / التحديثات</div>
+    <div class="cards">
+      ${cc("الطلبات الجديدة اليوم",uc.new,"a",`jumpTo('upd','new')`)}
+      ${cc("حجز موعد",uc.appt,"","jumpTo('upd','appt')")}
+      ${cc("تعديل بيانات اليوم",uc.edited,"","jumpTo('upd','edited')")}
+      ${cc("فيها نقص",uc.deficiency,"r","jumpTo('upd','deficiency')")}
+      ${cc("حركة (٣ أيام)",uc.activity,"","jumpTo('upd','activity')")}
+    </div>
+    <div class="sec">التسجيلات الجديدة (كل الطلبات · حسب create date)</div>
+    <div class="cards">
+      ${cc("تسجيلات اليوم",newToday,"a","showNewToday()")}
+      ${cc("إجمالي تسجيلات ٢٦/٢٧",pipeTotal,"",`jumpTo('pri','all')`)}
+      <div class="card"><p class="lbl">أكثر يوم تسجيلاً</p><p class="val" style="font-size:15px">${topDay?topDay[0]+" ("+topDay[1]+")":"—"}</p></div>
+    </div>
+    <div id="newlist" style="margin-bottom:10px"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+      <div><div class="sec">أكثر المدارس تسجيلاً</div>${topSchools.map(o=>`<div class="wf" style="justify-content:space-between;padding:5px 4px;border-bottom:1px solid #34342f"><span class="meta">${o[0]}</span><span class="name" style="font-size:14px">${o[1]}</span></div>`).join("")}</div>
+      <div><div class="sec">أكثر المدارس إكمالاً (مسجّل)</div>${topComplete.length?topComplete.map(o=>`<div class="wf" style="justify-content:space-between;padding:5px 4px;border-bottom:1px solid #34342f"><span class="meta">${o[0]}</span><span class="name g" style="font-size:14px">${o[1]}</span></div>`).join(""):'<div class="meta">—</div>'}</div>
+    </div>
+    <div class="sec">النواقص حسب الحقل — اضغطي لعرض الطلاب</div>
+    ${missCounts.map(o=>`<div class="row low" style="cursor:pointer" onclick="jumpTo('miss','${o[0].replace(/'/g,"")}')"><div class="row-top"><span class="name" style="font-size:14px">${o[0]}</span><span class="pri high">${o[1]} طالب</span></div><div class="prog"><div style="width:${Math.round(o[1]/total*100)}%;background:#a32d2d"></div></div></div>`).join("")||'<div class="note">لا نواقص.</div>'}
+    <div class="sec">التوزيع حسب المدرسة</div>
+    ${Object.entries(schools).sort((a,b)=>b[1]-a[1]).map(o=>`<div class="wf" style="justify-content:space-between;padding:6px 4px;border-bottom:1px solid #34342f"><span class="meta">${o[0]}</span><span class="name" style="font-size:14px">${o[1]}</span></div>`).join("")}
+    <div class="note">قواعد رصد التحديثات مبدئية (طلب جديد = أُنشئ اليوم، حجز موعد = عنده موعد، تعديل = عُدّل اليوم، حركة = آخر ٣ أيام). أرسلي لي طريقة الرصد الدقيقة لكل نوع وأضبطها.</div>`;
+}
+function setView(v){ VIEW=v; document.querySelectorAll(".tabs button").forEach(b=>b.classList.toggle("on",b.dataset.v===v)); v==="overview"?renderOverview():v==="main"?renderMain():v==="appt"?renderAppts():renderDisc(); }
+function build(){
+  const names=ALL.map(x=>(x.p.dealname||"").trim());
+  const dup=new Set(names.filter((n,i)=>names.indexOf(n)!==i&&n));
+  ALL.forEach(x=>{ x.A=audit(x.p,dup); x.pri=topPri(x.A); x.comp=completeness(x.p); });
+  setView("overview");
+}
+async function load(){
+  try{
+    const extra=getCustom().map(c=>c.prop).filter(Boolean);
+    const props=[...PROPS,...extra];
+    const r=await window.cowork.callMcpTool(TOOL,{objectType:"deals",filterGroups:[{filters:[{propertyName:"pipeline",operator:"EQ",value:PIPELINE},{propertyName:"dealstage",operator:"IN",values:[ACC,ENR]}]}],properties:props,limit:100});
+    if(r.isError) throw new Error(r.content&&r.content[0]?r.content[0].text:"tool error");
+    const dd=r.structuredContent??JSON.parse(r.content[0].text);
+    ALL=(dd.results||[]).map(d=>({id:d.id,p:d.properties}));
+    build();
+  }catch(e){ document.getElementById("content").innerHTML='<div class="err">تعذّر سحب البيانات: '+e.message+'</div>'; }
+}
+load();
+</script>
+</body>
+</html>
